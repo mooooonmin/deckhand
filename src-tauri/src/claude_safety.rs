@@ -12,7 +12,7 @@ use serde_json::{json, Map, Value};
 // 보조 방어선: 핵심은 EC2 ForceCommand. 로컬 deny는 ssh가 아닌 다른 변형 시도(scp/sftp/curl 등)
 // 를 추가 차단한다. 패턴 매칭이라 우회 가능 — 단독 의존 금지.
 
-const RULES_MARKER_KEY: &str = "_sidabari_managed";
+const RULES_MARKER_KEY: &str = "_deckhand_managed";
 
 // 위험 명령 deny 패턴. Claude Code의 글랍 패턴 형식.
 // "당장은 정보만 수집"(사용자 요청)이 목표라 SSH 외 모든 시스템 변경 변형을 차단.
@@ -98,11 +98,11 @@ fn deny_patterns() -> Vec<&'static str> {
         "Bash(*base64 -d* | bash*)",
         "Bash(*base64 -d* | sh*)",
         "Bash(*base64 --decode* | bash*)",
-        // .claude/settings 자체 변조 차단 (Sidabari가 관리)
+        // .claude/settings 자체 변조 차단 (Deckhand가 관리)
         "Edit(**/.claude/settings*)",
         "Write(**/.claude/settings*)",
-        // NOTE: 이전 버전에 `Bash(*sidabari*)`가 있었음 — 너무 broad해 진단 SSH 명령
-        // (키 경로에 sidabari-diag 포함)까지 차단해 [시스템 데이터 수집] 자체를 막았음.
+        // NOTE: 이전 버전에 `Bash(*deckhand*)`가 있었음 — 너무 broad해 진단 SSH 명령
+        // (키 경로에 deckhand-diag 포함)까지 차단해 [시스템 데이터 수집] 자체를 막았음.
         // 핵심 방어선은 EC2 ForceCommand 잠금이라 이 보조선 한 줄 빠져도 위험 미미.
         // [안전 규칙 설치]를 다시 클릭하면 self-cleanup으로 기존 라인이 자동 제거된다.
     ]
@@ -136,7 +136,7 @@ fn validate_dir(directory: &str) -> Result<PathBuf, String> {
 
 fn merge_deny(existing: &mut Map<String, Value>, new_patterns: &[&str]) -> usize {
     // self-cleanup 패턴 — marker.installed_patterns에 이전에 설치한 패턴 목록을 보관해
-    // [안전 규칙 설치] 재클릭 시 기존 _sidabari deny를 모두 제거 후 새 셋으로 갱신.
+    // [안전 규칙 설치] 재클릭 시 기존 _deckhand deny를 모두 제거 후 새 셋으로 갱신.
     // 이렇게 하면 deny 패턴이 코드에서 변경되어도 사용자가 한 번 더 클릭하면 동기화된다.
     let permissions = existing
         .entry("permissions".to_string())
@@ -173,7 +173,7 @@ fn merge_deny(existing: &mut Map<String, Value>, new_patterns: &[&str]) -> usize
         }
     };
 
-    // 1) 이전 _sidabari 패턴 제거.
+    // 1) 이전 _deckhand 패턴 제거.
     if !prev_installed.is_empty() {
         arr.retain(|v| {
             v.as_str()
@@ -186,9 +186,9 @@ fn merge_deny(existing: &mut Map<String, Value>, new_patterns: &[&str]) -> usize
     //     이전 코드가 등록했던 패턴을 식별 못 한다. 그래서 코드 변경으로 사라진 legacy 패턴은
     //     명시적으로 매 install 마다 제거 시도 (이미 없으면 무동작).
     //
-    //     `Bash(*sidabari*)`: 진단 SSH 명령(키 경로의 sidabari-diag 단어)에 매칭되어 [시스템
+    //     `Bash(*deckhand*)`: 진단 SSH 명령(키 경로의 deckhand-diag 단어)에 매칭되어 [시스템
     //     데이터 수집]을 차단하는 부작용 때문에 제거. 보호 가치 < 부작용.
-    const LEGACY_REMOVED: &[&str] = &["Bash(*sidabari*)"];
+    const LEGACY_REMOVED: &[&str] = &["Bash(*deckhand*)"];
     arr.retain(|v| {
         v.as_str()
             .map(|s| !LEGACY_REMOVED.contains(&s))
@@ -217,7 +217,7 @@ fn merge_deny(existing: &mut Map<String, Value>, new_patterns: &[&str]) -> usize
         RULES_MARKER_KEY.to_string(),
         json!({
             "version": 2,
-            "note": "Sidabari 자동 설치. docs/ec2-diag-setup/README.md 참조.",
+            "note": "Deckhand 자동 설치. docs/ec2-diag-setup/README.md 참조.",
             "installed_patterns": installed_list,
         }),
     );
@@ -227,7 +227,7 @@ fn merge_deny(existing: &mut Map<String, Value>, new_patterns: &[&str]) -> usize
 
 fn write_with_backup(path: &Path, content: &[u8]) -> Result<Option<String>, String> {
     let backup = if path.exists() {
-        let bak = path.with_extension("local.json.sidabari-bak");
+        let bak = path.with_extension("local.json.deckhand-bak");
         fs::copy(path, &bak).map_err(|e| format!("백업 실패: {}", e))?;
         Some(bak.to_string_lossy().to_string())
     } else {

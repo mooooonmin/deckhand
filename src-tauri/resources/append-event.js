@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Sidabari 훅 스크립트 — 일방향 이벤트 append.
+// Deckhand 훅 스크립트 — 일방향 이벤트 append.
 // 호출 예: node append-event.js Stop
 // stdin: Claude Code가 보낸 hook payload JSON
 // 동작: <baseDir>/events.jsonl 에 한 줄 append, exit 0 (어떤 경우에도 Claude 흐름 차단 X).
 //
 // CLAUDE.md §1.3 — 자동 차단 X. 이 스크립트는 신호만 흘리고 항상 0으로 종료한다.
-// __dirname = scripts/, 부모가 sidabari-hooks/ 베이스.
+// __dirname = scripts/, 부모가 deckhand-hooks/ 베이스.
 
 const fs = require('fs');
 const path = require('path');
@@ -24,9 +24,9 @@ process.stdin.on('end', () => {
   } catch (e) {
     payload = { _parse_error: String(e), _raw: stdin.slice(0, 1024) };
   }
-  payload._sidabari = {
+  payload._deckhand = {
     hook_event_name_arg: eventName,
-    panel_id: process.env.SIDABARI_PANEL_ID || null,
+    panel_id: process.env.DECKHAND_PANEL_ID || null,
     received_at_ms: Date.now(),
   };
   const baseDir = path.dirname(__dirname);
@@ -34,7 +34,7 @@ process.stdin.on('end', () => {
   try {
     fs.appendFileSync(eventsPath, JSON.stringify(payload) + '\n');
   } catch (e) {
-    process.stderr.write(`[sidabari-hook] append 실패: ${e}\n`);
+    process.stderr.write(`[deckhand-hook] append 실패: ${e}\n`);
   }
   process.exit(0);
 });

@@ -349,7 +349,7 @@ export function MainToolbar() {
 
   return (
     <header className="flex items-center gap-2 bg-card px-3 py-2">
-      <span className="mr-2 text-sm font-semibold text-accent-gold">Sidabari</span>
+      <span className="mr-2 text-sm font-semibold text-accent-gold">Deckhand</span>
       <span className="text-xs text-[#E4E6EA]">
         상태: <span className={cn("font-medium", statusColor(status))}>{status}</span>
       </span>

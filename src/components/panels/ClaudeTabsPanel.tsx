@@ -142,7 +142,7 @@ export function ClaudeTabsPanel() {
     listenHookEvent((e) => {
       if (cancelled) return;
       if (e.kind !== "session-start") return;
-      const p = e.payload._sidabari?.panel_id ?? "";
+      const p = e.payload._deckhand?.panel_id ?? "";
       const expected = tabsRef.current[mountedCount - 1];
       if (!expected) return;
       if (p === `claude-tab:${expected.id}`) advance();
@@ -289,7 +289,7 @@ export function ClaudeTabsPanel() {
                       args: ["-c"],
                       cwd: tab.directory,
                       // Phase 0 — Claude 훅이 패널을 식별하도록 ENV 주입.
-                      env: { SIDABARI_PANEL_ID: `claude-tab:${tab.id}` },
+                      env: { DECKHAND_PANEL_ID: `claude-tab:${tab.id}` },
                     }}
                   />
                 ) : (

@@ -20,7 +20,7 @@ function formatIdle(ms: number): string {
 }
 
 type Props = {
-  /** SIDABARI_PANEL_ID와 동일한 키 (예: "main-claude", "claude-tab:<uuid>"). */
+  /** DECKHAND_PANEL_ID와 동일한 키 (예: "main-claude", "claude-tab:<uuid>"). */
   panelKey: string;
 };
 

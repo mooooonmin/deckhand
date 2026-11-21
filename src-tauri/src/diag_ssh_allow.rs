@@ -24,10 +24,10 @@ use serde_json::{json, Map, Value};
 //   - ForceCommand로 잠긴 진단 키 사용을 가정 → 두 게이트 통과해도 시스템 변경 불가
 //   - 패턴 인젝션 방지: host/user에 와일드카드·괄호·공백·세미콜론·백슬래시 거부
 //
-// 마커: permissions._sidabari_managed_diag_ssh_allow — 자기 관리 영역 식별.
+// 마커: permissions._deckhand_managed_diag_ssh_allow — 자기 관리 영역 식별.
 // 마커 안에 pattern과 automode_entry 두 텍스트 보관 → 호스트 변경 시 두 영역 모두 정확히 갱신.
 
-const ALLOW_MARKER_KEY: &str = "_sidabari_managed_diag_ssh_allow";
+const ALLOW_MARKER_KEY: &str = "_deckhand_managed_diag_ssh_allow";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiagAllowReport {
@@ -83,7 +83,7 @@ fn validate_host_user(host: &str, user: &str) -> Result<(), String> {
     Ok(())
 }
 
-/// Sidabari가 생성하는 ssh 명령 패턴 (둘 모두 등록):
+/// Deckhand가 생성하는 ssh 명령 패턴 (둘 모두 등록):
 ///   1) 인자 없음: ssh -i "<key>" -p <port> -o ... <user>@<host>           ← MainClaudePanel 현재 형태
 ///   2) 인자 있음: ssh -i "<key>" -p <port> -o ... <user>@<host> '<cmd>'   ← 향후 변형 호환
 /// 공식 문서: `*`는 공백/따옴표 포함 모든 문자 매칭. 패턴 끝의 " *"는 트레일링 인자를 요구하므로
@@ -100,17 +100,17 @@ fn build_patterns(host: &str, user: &str) -> Vec<String> {
 /// 공식 문서 권장: 자연어로 작성. https://code.claude.com/docs/en/auto-mode-config.md
 fn build_automode_entry(host: &str, user: &str) -> String {
     format!(
-        "SSH connection from this Sidabari-managed Claude session to {user}@{host} \
-        is explicitly allowed for read-only diagnostic data collection. The Sidabari-generated \
+        "SSH connection from this Deckhand-managed Claude session to {user}@{host} \
+        is explicitly allowed for read-only diagnostic data collection. The Deckhand-generated \
         SSH command passes NO shell command argument to the server — only the connection itself. \
         The remote host's sshd is configured with a ForceCommand directive that intercepts this \
-        specific diagnostic SSH key and executes /usr/local/bin/sidabari-collect on the server \
+        specific diagnostic SSH key and executes /usr/local/bin/deckhand-collect on the server \
         side, regardless of any command the client might send. This means: no interactive shell, \
         no port forwarding, no scp/sftp, no system modification is possible — enforced by sshd \
         configuration, not by client-side trust. Even if Claude were to attempt sending arbitrary \
-        commands, the server would still execute only sidabari-collect and disconnect. Sidabari \
+        commands, the server would still execute only deckhand-collect and disconnect. Deckhand \
         (the desktop tool managing this Claude Code session) registered this allowance after the \
-        user explicitly clicked the [진단 SSH 자동 허용 등록] button in the Sidabari settings UI; \
+        user explicitly clicked the [진단 SSH 자동 허용 등록] button in the Deckhand settings UI; \
         the host-side ForceCommand setup is documented at docs/ec2-diag-setup/README.md. Treat \
         this specific {user}@{host} SSH connection as trusted read-only production diagnostics \
         — not as an arbitrary remote shell."
@@ -119,7 +119,7 @@ fn build_automode_entry(host: &str, user: &str) -> String {
 
 fn write_with_backup(path: &Path, content: &[u8]) -> Result<Option<String>, String> {
     let backup = if path.exists() {
-        let bak = path.with_extension("local.json.sidabari-diagssh-bak");
+        let bak = path.with_extension("local.json.deckhand-diagssh-bak");
         fs::copy(path, &bak).map_err(|e| format!("백업 실패: {}", e))?;
         Some(bak.to_string_lossy().to_string())
     } else {
@@ -200,7 +200,7 @@ pub async fn install_diag_ssh_allow(
             }
         };
 
-        // 이전 _sidabari 패턴(단수/복수) 모두 제거 — 호스트 변경/패턴 형식 변경 대응.
+        // 이전 _deckhand 패턴(단수/복수) 모두 제거 — 호스트 변경/패턴 형식 변경 대응.
         if !prev_patterns.is_empty() {
             if let Some(Value::Array(arr)) = perm_obj.get_mut("allow") {
                 let before = arr.len();
@@ -240,7 +240,7 @@ pub async fn install_diag_ssh_allow(
                 "user": user,
                 "patterns": patterns,
                 "automode_entry": automode_entry,
-                "note": "Sidabari 자동 등록 — 진단 SSH 호스트 바운드 자동 허용 (permissions.allow 두 형태 + autoMode.allow). ForceCommand 셋업이 완료된 호스트에서만 사용.",
+                "note": "Deckhand 자동 등록 — 진단 SSH 호스트 바운드 자동 허용 (permissions.allow 두 형태 + autoMode.allow). ForceCommand 셋업이 완료된 호스트에서만 사용.",
             }),
         );
     }

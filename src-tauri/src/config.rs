@@ -209,7 +209,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             schema_version: 1,
-            display_name: "Sidabari".to_string(),
+            display_name: "Deckhand".to_string(),
             project: Project::default(),
             claude_code_sessions: ClaudeCodeSessions::default(),
             ec2: Ec2Config::default(),

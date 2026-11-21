@@ -16,9 +16,9 @@ const STORAGE: Storage | undefined =
   typeof window !== "undefined" ? window.localStorage : undefined;
 
 export function MainLayout() {
-  const rows = useDefaultLayout({ id: "sidabari-rows", storage: STORAGE });
-  const row0 = useDefaultLayout({ id: "sidabari-row0", storage: STORAGE });
-  const row1 = useDefaultLayout({ id: "sidabari-row1", storage: STORAGE });
+  const rows = useDefaultLayout({ id: "deckhand-rows", storage: STORAGE });
+  const row0 = useDefaultLayout({ id: "deckhand-row0", storage: STORAGE });
+  const row1 = useDefaultLayout({ id: "deckhand-row1", storage: STORAGE });
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">

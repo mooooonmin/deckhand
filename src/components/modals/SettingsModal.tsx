@@ -63,7 +63,7 @@ const TABS: ReadonlyArray<{
 
 const DEFAULT_CONFIG: Config = ConfigSchema.parse({
   schema_version: 1,
-  display_name: "Sidabari",
+  display_name: "Deckhand",
   project: { name: "" },
   claude_code_sessions: {
     main: { label: "", directory: "", auto_start: false },
@@ -1311,7 +1311,7 @@ export function SettingsModal({ open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle className="text-accent-gold">설정</DialogTitle>
           <DialogDescription>
-            Sidabari 설정 — 사양서 §5.2 스키마 기반 (개인키는 경로만 저장)
+            Deckhand 설정 — 사양서 §5.2 스키마 기반 (개인키는 경로만 저장)
           </DialogDescription>
         </DialogHeader>
 

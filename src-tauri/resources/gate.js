@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sidabari 훅 스크립트 — 양방향 게이트 (PreToolUse 차단 결정용).
+// Deckhand 훅 스크립트 — 양방향 게이트 (PreToolUse 차단 결정용).
 // 호출 예: node gate.js PreToolUse
 // stdin: Claude Code가 보낸 hook payload JSON
 // 동작:
@@ -27,7 +27,7 @@ process.stdin.on('end', () => {
   try {
     payload = JSON.parse(stdin || '{}');
   } catch (e) {
-    emit('allow', `Sidabari gate: stdin 파싱 실패 (${e})`);
+    emit('allow', `Deckhand gate: stdin 파싱 실패 (${e})`);
     return;
   }
 
@@ -39,7 +39,7 @@ process.stdin.on('end', () => {
 
   const enriched = {
     request_id: id,
-    panel_id: process.env.SIDABARI_PANEL_ID || null,
+    panel_id: process.env.DECKHAND_PANEL_ID || null,
     hook_event_name_arg: eventName,
     sent_at_ms: Date.now(),
     payload,
@@ -49,7 +49,7 @@ process.stdin.on('end', () => {
     fs.writeFileSync(reqTmpPath, JSON.stringify(enriched));
     fs.renameSync(reqTmpPath, reqPath);
   } catch (e) {
-    emit('allow', `Sidabari gate: req 작성 실패 (${e})`);
+    emit('allow', `Deckhand gate: req 작성 실패 (${e})`);
     return;
   }
 
@@ -63,7 +63,7 @@ process.stdin.on('end', () => {
     } catch (e) {
       if (Date.now() - startMs > TIMEOUT_MS) {
         cleanup(reqPath, respPath);
-        emit('deny', 'Sidabari gate: 30초 timeout (응답 없음)');
+        emit('deny', 'Deckhand gate: 30초 timeout (응답 없음)');
         return;
       }
       setTimeout(poll, POLL_MS);

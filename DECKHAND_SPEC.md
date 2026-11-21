@@ -1,7 +1,7 @@
-# Sidabari 프로젝트 사양서
+# Deckhand 프로젝트 사양서
 
-> **프로젝트명**: Sidabari (저장소/패키지/코드 식별자)
-> **표시명**: Sidabari (기본값, 사용자 변경 가능)
+> **프로젝트명**: Deckhand (저장소/패키지/코드 식별자)
+> **표시명**: Deckhand (기본값, 사용자 변경 가능)
 > **목적**: Claude Code 기반 바이브 코딩에서 발생하는 반복적 배포-진단-수정 사이클을 자동화하는 1인용 도구
 > **라이선스**: MIT
 > **저작**: 모든 코드·문서 100% Claude Code 작성. 인간 협업자(cx8537)는 요구사항·사양·검수만 담당하며 코드는 직접 손대지 않는다 (자세히는 README.md "저작 기록" 참조).
@@ -262,9 +262,9 @@ Claude Code로 코드 작성 → 빌드 → AWS EC2 배포 → 로그 확인 →
 - **한 도구 인스턴스 = 한 프로젝트**
 - **JSON 파일**로 저장
 - **OS 표준 위치** 사용 (Tauri의 path API)
-  - macOS: `~/Library/Application Support/sidabari/config.json`
-  - Windows: `%APPDATA%\sidabari\config.json`
-  - Linux: `~/.config/sidabari/config.json`
+  - macOS: `~/Library/Application Support/deckhand/config.json`
+  - Windows: `%APPDATA%\deckhand\config.json`
+  - Linux: `~/.config/deckhand/config.json`
 - 재시작 시 설정에 따라 Claude Code 자동 실행, EC2 자동 접속
 - **pem 키 파일은 경로만 저장** (파일 자체는 외부 보관)
 - 설정 UI는 별도 모달 또는 별도 윈도우
@@ -274,7 +274,7 @@ Claude Code로 코드 작성 → 빌드 → AWS EC2 배포 → 로그 확인 →
 ```json
 {
   "schema_version": 1,
-  "display_name": "Sidabari",
+  "display_name": "Deckhand",
 
   "project": {
     "name": "myapp"

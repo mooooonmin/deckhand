@@ -22,7 +22,7 @@ export type ConsoleEvent = {
   message: string;
 };
 
-// Phase 1 — 패널별 Claude turn 활성 상태. key는 SIDABARI_PANEL_ID (예: "main-claude", "claude-tab:<uuid>").
+// Phase 1 — 패널별 Claude turn 활성 상태. key는 DECKHAND_PANEL_ID (예: "main-claude", "claude-tab:<uuid>").
 // SessionStart/Pre/PostToolUse → "thinking", Stop/SubagentStop → "idle".
 export type PanelActivityState = "thinking" | "idle";
 export type PanelActivity = {
@@ -107,7 +107,7 @@ function newEvent(source: string, message: string): ConsoleEvent {
 export const useAppStore = create<AppState>((set) => ({
   attemptStatus: "idle",
   attemptId: null,
-  consoleEvents: [newEvent("SYSTEM", "Sidabari 시작")],
+  consoleEvents: [newEvent("SYSTEM", "Deckhand 시작")],
   focusedPanelId: null,
   mainClaudeSessionId: null,
   mainEc2SessionId: null,

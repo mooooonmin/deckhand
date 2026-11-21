@@ -11,7 +11,7 @@ use crate::hooks_bus::HookBusState;
 // 사양서 §3 / CLAUDE.md §1.2 — Claude Code 훅을 .claude/settings.local.json에 등록한다.
 // claude_safety.rs와 동일 패턴: 기존 설정과 병합, 마커로 자기 관리 영역 식별, 백업 후 쓰기.
 
-const HOOKS_MARKER_KEY: &str = "_sidabari_managed_hooks";
+const HOOKS_MARKER_KEY: &str = "_deckhand_managed_hooks";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HookInstallReport {
@@ -71,7 +71,7 @@ fn build_hook_specs(
     specs
 }
 
-/// Sidabari가 관리하는 영역(_sidabari=true) 만 제거 + 새 spec 일괄 추가.
+/// Deckhand가 관리하는 영역(_deckhand=true) 만 제거 + 새 spec 일괄 추가.
 /// 이렇게 하면 사용자가 [위험 도구 차단] 토글을 끄고 다시 [훅 설치]를 누르면 gate가 자동 제거된다.
 fn merge_hooks(
     existing: &mut Map<String, Value>,
@@ -88,22 +88,22 @@ fn merge_hooks(
         }
     };
 
-    // 1) 기존 _sidabari 그룹 제거.
+    // 1) 기존 _deckhand 그룹 제거.
     for (_event, val) in hooks_obj.iter_mut() {
         if let Value::Array(arr) = val {
             arr.retain(|group| {
                 let hooks = group.get("hooks").and_then(|h| h.as_array());
-                let all_sidabari = hooks
+                let all_deckhand = hooks
                     .map(|hs| {
                         !hs.is_empty()
                             && hs.iter().all(|h| {
-                                h.get("_sidabari")
+                                h.get("_deckhand")
                                     .and_then(|s| s.as_bool())
                                     .unwrap_or(false)
                             })
                     })
                     .unwrap_or(false);
-                !all_sidabari
+                !all_deckhand
             });
         }
     }
@@ -130,7 +130,7 @@ fn merge_hooks(
                 {
                     "type": "command",
                     "command": command,
-                    "_sidabari": true
+                    "_deckhand": true
                 }
             ]
         });
@@ -142,7 +142,7 @@ fn merge_hooks(
         HOOKS_MARKER_KEY.to_string(),
         json!({
             "version": 1,
-            "note": "Sidabari 자동 설치. 갱신은 설정 모달 → [훅 설치] 다시 클릭.",
+            "note": "Deckhand 자동 설치. 갱신은 설정 모달 → [훅 설치] 다시 클릭.",
         }),
     );
 
@@ -151,7 +151,7 @@ fn merge_hooks(
 
 fn write_with_backup(path: &Path, content: &[u8]) -> Result<Option<String>, String> {
     let backup = if path.exists() {
-        let bak = path.with_extension("local.json.sidabari-hooks-bak");
+        let bak = path.with_extension("local.json.deckhand-hooks-bak");
         fs::copy(path, &bak).map_err(|e| format!("백업 실패: {}", e))?;
         Some(bak.to_string_lossy().to_string())
     } else {
@@ -234,7 +234,7 @@ pub async fn claude_hooks_status(directory: String) -> Result<Option<HookInstall
                         .and_then(|h| h.as_array())
                         .map(|hooks| {
                             hooks.iter().any(|h| {
-                                h.get("_sidabari")
+                                h.get("_deckhand")
                                     .and_then(|s| s.as_bool())
                                     .unwrap_or(false)
                             })

@@ -38,7 +38,7 @@ async function sendDesktopToast(panel: string, payload: HookPayload) {
       : "";
   try {
     await sendNotification({
-      title: `Sidabari — ${panel}`,
+      title: `Deckhand — ${panel}`,
       body: `${subtype}${tail}`,
     });
   } catch (e) {
@@ -62,7 +62,7 @@ async function sendDesktopToast(panel: string, payload: HookPayload) {
 // 이 컴포넌트는 App.tsx 루트에 한 번만 렌더 (Listen 등록을 한 번만 하기 위함).
 
 function panelLabel(p: HookPayload): string {
-  return p._sidabari?.panel_id ?? "?";
+  return p._deckhand?.panel_id ?? "?";
 }
 
 function summary(payload: HookPayload): string {
@@ -109,7 +109,7 @@ export function HookBridge() {
     listenHookEvent((e: HookEventEmit) => {
       const { kind, payload } = e;
       const panel = panelLabel(payload);
-      const panelKey = payload._sidabari?.panel_id;
+      const panelKey = payload._deckhand?.panel_id;
       const verbose = verboseRef.current;
       switch (kind) {
         case "stop":

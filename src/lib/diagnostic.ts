@@ -28,7 +28,7 @@ export function buildCollectCommand(
     return override.replace(/\{service\}/g, svc);
   }
 
-  // sidabari-collect.sh와 항목 셋 동일하게 유지 (Task #48). 변경 시 양쪽 동기화 필수.
+  // deckhand-collect.sh와 항목 셋 동일하게 유지 (Task #48). 변경 시 양쪽 동기화 필수.
   return [
     "clear",
     `PID=$(systemctl show -p MainPID --value ${svc} 2>/dev/null)`,

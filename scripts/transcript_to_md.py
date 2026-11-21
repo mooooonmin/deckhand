@@ -86,7 +86,7 @@ def main():
     dst = Path(sys.argv[2])
 
     out = []
-    out.append(f"# Sidabari 대화 트랜스크립트\n")
+    out.append(f"# Deckhand 대화 트랜스크립트\n")
     out.append(f"> Source: `{src.name}`\n")
     out.append("---\n")
 

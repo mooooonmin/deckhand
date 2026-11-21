@@ -28,10 +28,10 @@ import { cn } from "@/lib/utils";
 // 사양서 §3.3 / docs/ec2-diag-setup/README.md — 원클릭 자동 셋업.
 //
 // 단계:
-//   1. 진단 키페어 ensure (~/.ssh/sidabari-diag, 기존 있으면 재사용)
+//   1. 진단 키페어 ensure (~/.ssh/deckhand-diag, 기존 있으면 재사용)
 //   2. EC2에 임시 디렉토리 생성 (mkdir)
-//   3. install.sh / sidabari-collect.sh / sidabari-diag.pub 업로드 (SFTP × 3)
-//   4. install.sh 실행 (sudo로 ForceCommand 잠금 + sudoers + sidabari-collect 설치)
+//   3. install.sh / deckhand-collect.sh / deckhand-diag.pub 업로드 (SFTP × 3)
+//   4. install.sh 실행 (sudo로 ForceCommand 잠금 + sudoers + deckhand-collect 설치)
 //   5. config.ec2.diag_private_key_path 자동 등록
 //   6. staging 정리
 //
@@ -117,10 +117,10 @@ export function DiagSetupModal({ open, onOpenChange, onComplete }: Props) {
       }
 
       // 1. 진단 키페어 + staging
-      // 진단 키페어는 항상 표준 경로(~/.ssh/sidabari-diag)에 생성/재사용한다.
+      // 진단 키페어는 항상 표준 경로(~/.ssh/deckhand-diag)에 생성/재사용한다.
       // 사용자가 [진단 전용 키 경로] 자리에 배포용 .pem 등 잘못된 키를 등록한 상태여도
       // 셋업은 영향받지 않고 표준 경로로 진행 — 셋업 완료 시 그 경로가 자동 등록된다.
-      setStep(2, "진단 키페어 준비 (~/.ssh/sidabari-diag)");
+      setStep(2, "진단 키페어 준비 (~/.ssh/deckhand-diag)");
       const prep = await diagSetupPrepare(undefined);
       setupId = prep.setup_id;
       appendLog(
@@ -154,26 +154,26 @@ export function DiagSetupModal({ open, onOpenChange, onComplete }: Props) {
       });
       appendLog("  install.sh 업로드 완료");
 
-      setStep(4, "셋업 파일 업로드 (sidabari-collect.sh)");
+      setStep(4, "셋업 파일 업로드 (deckhand-collect.sh)");
       await sftpUpload({
         ...sshBase,
         local_path: prep.staging_collect_path,
-        remote_path: `${prep.remote_setup_dir}/sidabari-collect.sh`,
+        remote_path: `${prep.remote_setup_dir}/deckhand-collect.sh`,
       });
-      appendLog("  sidabari-collect.sh 업로드 완료");
+      appendLog("  deckhand-collect.sh 업로드 완료");
 
-      setStep(4, "셋업 파일 업로드 (sidabari-diag.pub)");
+      setStep(4, "셋업 파일 업로드 (deckhand-diag.pub)");
       await sftpUpload({
         ...sshBase,
         local_path: prep.staging_pub_path,
-        remote_path: `${prep.remote_setup_dir}/sidabari-diag.pub`,
+        remote_path: `${prep.remote_setup_dir}/deckhand-diag.pub`,
       });
-      appendLog("  sidabari-diag.pub 업로드 완료");
+      appendLog("  deckhand-diag.pub 업로드 완료");
 
       // 4. install.sh 실행 (sudo 사용 — EC2 기본 사용자 NOPASSWD 가정)
       setStep(5, "install.sh 실행 (sudo)");
       const safeSvc = svc.replace(/['"\\]/g, "");
-      const installCmd = `cd ${prep.remote_setup_dir} && chmod +x install.sh sidabari-collect.sh && SIDABARI_SERVICE='${safeSvc}' bash ./install.sh`;
+      const installCmd = `cd ${prep.remote_setup_dir} && chmod +x install.sh deckhand-collect.sh && DECKHAND_SERVICE='${safeSvc}' bash ./install.sh`;
       await execAndWait(
         { ...sshBase, command: installCmd },
         (l) => appendLog(`  ${l.stream === "stderr" ? "(err) " : ""}${l.line}`),
@@ -235,7 +235,7 @@ export function DiagSetupModal({ open, onOpenChange, onComplete }: Props) {
         <DialogHeader>
           <DialogTitle className="text-accent-gold">원클릭 진단 셋업</DialogTitle>
           <DialogDescription>
-            진단 키페어를 <span className="font-mono">~/.ssh/sidabari-diag</span>에
+            진단 키페어를 <span className="font-mono">~/.ssh/deckhand-diag</span>에
             생성(기존 있으면 재사용)하고, EC2에 업로드 + ForceCommand 잠금 + 진단 키 경로 자동 등록까지
             처리합니다. EC2 사용자는 sudo가 NOPASSWD여야 하며, 셋업 후 sshd authorized_keys /
             sudoers.d / /usr/local/bin/이 변경됩니다. <strong>설정의 [진단 전용 키 경로]에 배포용
@@ -247,11 +247,11 @@ export function DiagSetupModal({ open, onOpenChange, onComplete }: Props) {
           <div className="grid gap-2 py-2 text-sm text-card-foreground">
             <p>다음 단계가 자동으로 실행됩니다:</p>
             <ol className="ml-4 list-decimal space-y-0.5 text-xs text-muted-foreground">
-              <li>진단 키페어 ensure (<span className="font-mono">~/.ssh/sidabari-diag</span>, 기존 있으면 재사용)</li>
-              <li>EC2 임시 디렉토리 생성 (<span className="font-mono">/tmp/sidabari-diag-setup-&lt;uuid&gt;</span>)</li>
-              <li>install.sh / sidabari-collect.sh / sidabari-diag.pub SFTP 업로드</li>
+              <li>진단 키페어 ensure (<span className="font-mono">~/.ssh/deckhand-diag</span>, 기존 있으면 재사용)</li>
+              <li>EC2 임시 디렉토리 생성 (<span className="font-mono">/tmp/deckhand-diag-setup-&lt;uuid&gt;</span>)</li>
+              <li>install.sh / deckhand-collect.sh / deckhand-diag.pub SFTP 업로드</li>
               <li>EC2에서 <span className="font-mono">install.sh</span> 실행 (sudo)</li>
-              <li>Sidabari 설정의 <span className="font-mono">diag_private_key_path</span> 자동 등록</li>
+              <li>Deckhand 설정의 <span className="font-mono">diag_private_key_path</span> 자동 등록</li>
               <li>로컬 staging 디렉토리 정리</li>
             </ol>
           </div>

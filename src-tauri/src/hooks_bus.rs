@@ -15,7 +15,7 @@ use crate::audit_log::AuditDb;
 // 사양서 §3 / CLAUDE.md §1.2 — Claude Code 훅으로부터 들어오는 시그널을 파일 기반 IPC로 받는다.
 //
 // 디렉토리 구조 (init에서 생성):
-//   <app_data>/sidabari-hooks/
+//   <app_data>/deckhand-hooks/
 //     scripts/append-event.js  (일방향 — node가 events.jsonl에 append)
 //     scripts/gate.js          (양방향 — req-/resp- 파일 페어)
 //     events.jsonl             (append-only, 우리 watcher가 tail)
@@ -31,7 +31,7 @@ use crate::audit_log::AuditDb;
 // CLAUDE.md §1.3:
 //   - watcher 실패 시 자동 재시도 X. stderr 로그 + emit으로 알림. 사용자 결정.
 
-const HOOKS_SUBDIR: &str = "sidabari-hooks";
+const HOOKS_SUBDIR: &str = "deckhand-hooks";
 const SCRIPTS_SUBDIR: &str = "scripts";
 const EVENTS_FILE: &str = "events.jsonl";
 const APPEND_SCRIPT: &str = "append-event.js";
@@ -225,7 +225,7 @@ fn tail_events(app: &AppHandle, events_path: &Path, offset: &mut u64) {
         // Phase 5a — 영구 적재. AuditDb가 setup 단계에서 manage되어 있어야 함.
         if let Some(audit) = app.try_state::<Arc<AuditDb>>() {
             let panel_id = payload
-                .get("_sidabari")
+                .get("_deckhand")
                 .and_then(|s| s.get("panel_id"))
                 .and_then(|v| v.as_str());
             let hook_event_name = payload
@@ -255,7 +255,7 @@ fn tail_events(app: &AppHandle, events_path: &Path, offset: &mut u64) {
 
 fn classify_event(payload: &Value) -> String {
     let arg = payload
-        .get("_sidabari")
+        .get("_deckhand")
         .and_then(|s| s.get("hook_event_name_arg"))
         .and_then(|v| v.as_str())
         .map(|s| s.to_string());

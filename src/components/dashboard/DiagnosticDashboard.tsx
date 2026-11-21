@@ -263,7 +263,7 @@ export function DiagnosticDashboard() {
   const cards = metrics ? buildCards(metrics) : MOCK_CARDS;
 
   // 헤드리스 새로고침 — 진단 패널 mount 여부와 무관하게 백그라운드 SSH 채널로 일괄 수집 실행.
-  // 키 우선순위: ec2.diag_private_key_path 있으면 진단 키(서버 ForceCommand가 sidabari-collect만 실행) →
+  // 키 우선순위: ec2.diag_private_key_path 있으면 진단 키(서버 ForceCommand가 deckhand-collect만 실행) →
   // 없으면 ec2.private_key_path(배포 키) + buildCollectCommand 클라이언트 명령.
   // exec_id를 미리 발급해 store(activeDiagExecId)에 기록 — [강제 중단] 통합.
   async function handleRefresh() {
@@ -305,10 +305,10 @@ export function DiagnosticDashboard() {
 
     let cmd: string;
     try {
-      // 진단 키 + ForceCommand: 서버가 SSH_ORIGINAL_COMMAND를 무시하고 sidabari-collect만 실행 →
+      // 진단 키 + ForceCommand: 서버가 SSH_ORIGINAL_COMMAND를 무시하고 deckhand-collect만 실행 →
       // command 텍스트는 사실상 무관. 의미 있는 문자열만 보내 server log 가독성 확보.
       cmd = useDiagKey
-        ? "sidabari-collect"
+        ? "deckhand-collect"
         : buildCollectCommand(svc, cfg.monitoring.collect_command);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

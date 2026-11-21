@@ -1,40 +1,29 @@
-# Sidabari
+# Deckhand
 
-> **1인용 Claude Code 바이브 코딩 자동화 도구**
+> **1인 서버 운영을 위한 Claude Code 배포·진단 도구**
 >
-> Claude Code로 코드를 작성하고 AWS EC2에 배포·진단·수정하는 반복 사이클을 한 화면에서 처리하기 위한 데스크톱 도구.
+> Claude Code로 코드를 작성하고, 서버에 배포하고, 로그를 보고 진단하는 반복 사이클을 한 화면에서 처리하는 데스크톱 앱입니다.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![Platform](https://img.shields.io/badge/Platform-Windows_11-0078D6?style=flat-square&logo=windows11&logoColor=white)
 ![Tauri](https://img.shields.io/badge/Tauri-2.x-24C8DB?style=flat-square&logo=tauri&logoColor=white)
 ![Rust](https://img.shields.io/badge/Rust-stable-000000?style=flat-square&logo=rust&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Authored by Claude Code](https://img.shields.io/badge/Authored_by-Claude_Code-D97757?style=flat-square&logo=anthropic&logoColor=white)
+
+> **개편 중**: 원본 기능을 그대로 가져온 상태이며, 내 사용 방식에 맞게 다듬는 중입니다.
 
 ---
 
-## 실 운용 사례
+## 출처
 
-이 도구는 현재 [**nullnull.co.kr**](https://nullnull.co.kr) — 온라인 강의 영상 판매 서비스 — 의 AWS EC2 백엔드 운영에 실제로 사용되고 있습니다. 빌드 → SFTP 업로드 → `deploy.sh` 재기동 → journalctl 로그 모니터링 → ERROR 발생 시 Claude 분석 요청까지의 일상 운영 루프를 Sidabari 한 화면에서 처리합니다. 데모/실험용이 아닌 **프로덕션 운영 도구**로 매일 사용 중입니다.
+이 저장소는 [cx8537/sidabari](https://github.com/cx8537/sidabari)(MIT)를 바탕으로 합니다.
+원본의 커밋 기록을 그대로 가져왔고, 이름을 Sidabari에서 Deckhand로 바꿨습니다.
 
-![Sidabari 메인 화면](docs/images/main.jpg)
+- 원본 저작권: cx8537 ([LICENSE](LICENSE) 참고)
+- 원본은 온라인 강의 서비스의 AWS EC2 백엔드 운영에 쓰이던 도구이며, 코드와 문서는 Claude Code가 작성했습니다.
+- 아래 스크린샷은 원본 저장소의 것입니다.
 
-> 한 화면에 메인 Claude Code · EC2 SSH · 시스템 진단 대시보드 · 도구 콘솔이 함께. 빌드·업로드·배포 자동화와 ERROR 감지 후 진단 루프까지 끊김 없이 진행. (위 스크린샷은 nullnull.co.kr LMS 백엔드 운영 중 캡처)
-
----
-
-## 저작 기록 (Authorship)
-
-> **이 프로젝트의 모든 코드와 문서는 [Claude Code](https://www.anthropic.com/claude-code)가 100% 작성·유지보수합니다.** 인간 협업자(`cx8537`)는 요구사항 정의·사양 결정·사용자 테스트·방향 검토를 담당했으며, **단 한 줄의 코드도 직접 손대지 않았습니다.**
-
-| 역할 | 담당 |
-|---|---|
-| 코드 작성 / 리팩토링 / 유지보수 | Claude Code (주로 Claude Opus 4.7 1M context, 일부 Sonnet) |
-| 모든 문서 (`README.md`, `SIDABARI_SPEC.md`, `CLAUDE.md`, `docs/**`) | Claude Code |
-| 사양 결정 · 요구사항 · UX 판단 · 검수 | cx8537 (인간) |
-| 라이선스/저작권 보유 | cx8537 (사용자가 도구를 통해 생성한 결과물의 권리) |
-
-매 세션 시작 시 [CLAUDE.md](CLAUDE.md)가 절대 원칙(추측 금지·자동 재시도 금지·보안 규칙 등)으로 적용되며, 새 기능 추가나 버그 수정도 모두 같은 규칙 아래 Claude Code가 수행합니다. 커밋 메시지에는 `Co-Authored-By: Claude` 트레일러로 일관 표기됩니다.
+![Deckhand 메인 화면](docs/images/main.jpg)
 
 ---
 
@@ -48,7 +37,7 @@ Claude Code → 빌드 → SFTP 업로드 → `deploy.sh` → 로그 모니터�
 - **자동 재시도 금지.** 실패 시 즉시 멈추고 사람이 판단.
 - **강제 중단 시 SSH 채널은 유지.** 같은 세션에서 수작업으로 이어받기.
 
-자세한 동작 사양은 [SIDABARI_SPEC.md](SIDABARI_SPEC.md), 작업 규칙·보안 정책은 [CLAUDE.md](CLAUDE.md)를 참고하세요.
+자세한 동작 사양은 [DECKHAND_SPEC.md](DECKHAND_SPEC.md), 작업 규칙·보안 정책은 [CLAUDE.md](CLAUDE.md)를 참고하세요.
 
 ---
 
@@ -143,7 +132,7 @@ npm run tauri build
 
 산출물 위치 (Windows 기준):
 
-- `src-tauri/target/release/sidabari.exe` — 단일 실행파일
+- `src-tauri/target/release/deckhand.exe` — 단일 실행파일
 - `src-tauri/target/release/bundle/` — MSI / NSIS 인스톨러
 
 ---
@@ -151,7 +140,7 @@ npm run tauri build
 ## 프로젝트 구조
 
 ```
-Sidabari/
+Deckhand/
 ├── src/                       # React 프론트엔드
 │   ├── components/
 │   │   ├── layout/            # MainLayout, MainToolbar
@@ -176,11 +165,11 @@ Sidabari/
 │       ├── diag_setup.rs      # 원클릭 진단 키페어 + ForceCommand 셋업
 │       └── diag_ssh_allow.rs  # autoMode allow 패턴 등록
 ├── docs/
-│   └── ec2-diag-setup/        # 서버 측 install.sh, sidabari-collect.sh
+│   └── ec2-diag-setup/        # 서버 측 install.sh, deckhand-collect.sh
 ├── branding/
-│   └── sidabari-icon-source.png  # 아이콘 원본 (1024×1024)
+│   └── deckhand-icon-source.png  # 아이콘 원본 (1024×1024)
 ├── CLAUDE.md                  # 작업 절대 원칙 + 보안 가이드 + UI 가이드
-├── SIDABARI_SPEC.md           # 동작 사양서
+├── DECKHAND_SPEC.md           # 동작 사양서
 └── README.md
 ```
 
@@ -189,14 +178,14 @@ Sidabari/
 ## 설정
 
 - 위치 (OS 표준):
-  - Windows: `%APPDATA%\sidabari\sidabari.toml`
-  - macOS: `~/Library/Application Support/sidabari/sidabari.toml`
-  - Linux: `~/.config/sidabari/sidabari.toml`
+  - Windows: `%APPDATA%\deckhand\deckhand.toml`
+  - macOS: `~/Library/Application Support/deckhand/deckhand.toml`
+  - Linux: `~/.config/deckhand/deckhand.toml`
 - 앱 내 [설정] 모달에서 편집 (탭: 일반 / 서버 / 빌드·배포 / 모니터링 / 시스템 진단).
 - **PEM 키는 경로만 저장** — 키 내용은 메모리에만 로드. 로그에 자격증명 안 찍힘.
 - 설정 변경 후 [재시작] 또는 자동 재시작 토글로 모든 Claude PTY 일괄 재시작 (`.claude/settings.local.json` 즉시 반영).
 
-스키마 레퍼런스는 [SIDABARI_SPEC.md §5.2](SIDABARI_SPEC.md#52-설정-파일-스키마-참고), 코드는 `src-tauri/src/config.rs` / `src/lib/config.ts`.
+스키마 레퍼런스는 [DECKHAND_SPEC.md §5.2](DECKHAND_SPEC.md#52-설정-파일-스키마-참고), 코드는 `src-tauri/src/config.rs` / `src/lib/config.ts`.
 
 ### 설정 모달 화면 (5개 탭)
 
@@ -222,8 +211,8 @@ Sidabari/
 
 앱의 [설정] → [시스템 진단] → **[원클릭 진단 셋업]** 버튼으로 일괄 처리:
 
-1. 로컬에 `~/.ssh/sidabari-diag` ed25519 키페어 생성/재사용
-2. SFTP로 서버에 `install.sh` + `sidabari-collect.sh` 업로드
+1. 로컬에 `~/.ssh/deckhand-diag` ed25519 키페어 생성/재사용
+2. SFTP로 서버에 `install.sh` + `deckhand-collect.sh` 업로드
 3. 서버에서 sudoers / sshd `Match User` / `authorized_keys` `command="..."` 자동 구성
 
 세부 동작은 [docs/ec2-diag-setup/README.md](docs/ec2-diag-setup/README.md) 참조.
@@ -245,7 +234,7 @@ Sidabari/
 
 | 문서 | 용도 |
 |------|------|
-| [SIDABARI_SPEC.md](SIDABARI_SPEC.md) | 동작 사양서 (워크플로우 / UI / 설정 스키마) |
+| [DECKHAND_SPEC.md](DECKHAND_SPEC.md) | 동작 사양서 (워크플로우 / UI / 설정 스키마) |
 | [CLAUDE.md](CLAUDE.md) | 작업 규칙·보안 가이드·UI 스타일 가이드 (Claude Code 작업 시 1차 참조) |
 | [docs/ec2-diag-setup/README.md](docs/ec2-diag-setup/README.md) | EC2 진단 키 + ForceCommand 셋업 상세 |
 

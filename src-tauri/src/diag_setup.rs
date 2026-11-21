@@ -13,16 +13,16 @@ use uuid::Uuid;
 // 그렇게 분리하면 line/done/progress 이벤트 stream을 frontend 진행 모달이 그대로 사용 가능.
 //
 // 보안 (CLAUDE.md §1.2):
-//   - 진단 키페어는 ~/.ssh/sidabari-diag (Unix) / %USERPROFILE%\.ssh\sidabari-diag (Windows)
+//   - 진단 키페어는 ~/.ssh/deckhand-diag (Unix) / %USERPROFILE%\.ssh\deckhand-diag (Windows)
 //   - private 0600, public 0644 (Unix). 디렉토리 0700.
 //   - 기존 키페어가 있으면 재사용 (다른 도구가 쓰고 있을 수 있어 함부로 안 건드림).
 
 const INSTALL_SH: &str = include_str!("../../docs/ec2-diag-setup/install.sh");
-const COLLECT_SH: &str = include_str!("../../docs/ec2-diag-setup/sidabari-collect.sh");
+const COLLECT_SH: &str = include_str!("../../docs/ec2-diag-setup/deckhand-collect.sh");
 
 #[derive(Debug, Deserialize)]
 pub struct DiagSetupPrepareOpts {
-    /// 비어있으면 ~/.ssh/sidabari-diag로 기본.
+    /// 비어있으면 ~/.ssh/deckhand-diag로 기본.
     #[serde(default)]
     pub diag_key_path: Option<String>,
 }
@@ -44,7 +44,7 @@ fn default_diag_key_path(app: &AppHandle) -> Result<PathBuf, String> {
         .path()
         .home_dir()
         .map_err(|e| format!("home_dir resolve 실패: {}", e))?;
-    Ok(home.join(".ssh").join("sidabari-diag"))
+    Ok(home.join(".ssh").join("deckhand-diag"))
 }
 
 fn ensure_keypair(priv_path: &Path, pub_path: &Path) -> Result<(bool, String), String> {
@@ -98,7 +98,7 @@ fn ensure_keypair(priv_path: &Path, pub_path: &Path) -> Result<(bool, String), S
         .to_openssh(LineEnding::LF)
         .map_err(|e| format!("private 변환 실패: {}", e))?;
 
-    let pub_with_comment = format!("{} sidabari-diagnostic\n", pub_openssh.trim_end());
+    let pub_with_comment = format!("{} deckhand-diagnostic\n", pub_openssh.trim_end());
 
     fs::write(priv_path, priv_openssh.as_bytes())
         .map_err(|e| format!("private 키 쓰기 실패 ({}): {}", priv_path.display(), e))?;
@@ -125,7 +125,7 @@ fn derive_pub_from_priv(priv_path: &Path, pub_path: &Path) -> Result<(bool, Stri
         .public_key()
         .to_openssh()
         .map_err(|e| format!("public 도출 실패: {}", e))?;
-    let pub_with_comment = format!("{} sidabari-diagnostic\n", pub_openssh.trim_end());
+    let pub_with_comment = format!("{} deckhand-diagnostic\n", pub_openssh.trim_end());
     fs::write(pub_path, pub_with_comment.as_bytes())
         .map_err(|e| format!("public 키 쓰기 실패 ({}): {}", pub_path.display(), e))?;
     #[cfg(unix)]
@@ -136,7 +136,7 @@ fn derive_pub_from_priv(priv_path: &Path, pub_path: &Path) -> Result<(bool, Stri
     Ok((false, pub_with_comment))
 }
 
-/// 진단 키페어 ensure + staging 디렉토리에 install.sh / sidabari-collect.sh / .pub 풀어쓰기.
+/// 진단 키페어 ensure + staging 디렉토리에 install.sh / deckhand-collect.sh / .pub 풀어쓰기.
 /// frontend는 반환된 staging_*_path를 sftp_upload의 local_path로 사용.
 #[tauri::command]
 pub async fn diag_setup_prepare(
@@ -166,17 +166,17 @@ pub async fn diag_setup_prepare(
         .map_err(|e| format!("staging 디렉토리 생성 실패 ({}): {}", staging_root.display(), e))?;
 
     let staging_install = staging_root.join("install.sh");
-    let staging_collect = staging_root.join("sidabari-collect.sh");
-    let staging_pub = staging_root.join("sidabari-diag.pub");
+    let staging_collect = staging_root.join("deckhand-collect.sh");
+    let staging_pub = staging_root.join("deckhand-diag.pub");
 
     fs::write(&staging_install, INSTALL_SH)
         .map_err(|e| format!("install.sh 쓰기 실패: {}", e))?;
     fs::write(&staging_collect, COLLECT_SH)
-        .map_err(|e| format!("sidabari-collect.sh 쓰기 실패: {}", e))?;
+        .map_err(|e| format!("deckhand-collect.sh 쓰기 실패: {}", e))?;
     fs::write(&staging_pub, pub_content.as_bytes())
-        .map_err(|e| format!("sidabari-diag.pub 쓰기 실패: {}", e))?;
+        .map_err(|e| format!("deckhand-diag.pub 쓰기 실패: {}", e))?;
 
-    let remote_setup_dir = format!("/tmp/sidabari-diag-setup-{}", setup_id);
+    let remote_setup_dir = format!("/tmp/deckhand-diag-setup-{}", setup_id);
 
     Ok(DiagSetupPrepareReport {
         diag_private_key_path: priv_path.to_string_lossy().to_string(),

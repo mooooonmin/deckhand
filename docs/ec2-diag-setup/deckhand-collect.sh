@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Sidabari 진단 전용 SSH ForceCommand 스크립트.
+# Deckhand 진단 전용 SSH ForceCommand 스크립트.
 # 이 키로 들어오는 모든 SSH 요청에서 sshd가 사용자가 보낸 명령을 무시하고 이 스크립트만 실행한다.
 # 결과적으로 진단 전용 키가 통째로 유출돼도 시스템 변경은 물리적으로 불가능.
 #
-# 위치: /usr/local/bin/sidabari-collect (root 소유, 0755)
+# 위치: /usr/local/bin/deckhand-collect (root 소유, 0755)
 # 호출: authorized_keys의 command="..." 옵션이 자동 invocation
 #
 # 출력은 stdout으로만 — Claude(SSH 클라이언트 측)가 그대로 받아 분석한다.
@@ -11,16 +11,16 @@
 
 set -uo pipefail
 
-# 환경변수 파일 source — install.sh가 /etc/default/sidabari-collect에 SIDABARI_SERVICE를 기록.
+# 환경변수 파일 source — install.sh가 /etc/default/deckhand-collect에 DECKHAND_SERVICE를 기록.
 # ForceCommand로 호출되면 sshd가 /etc/default/*를 자동 source하지 않으므로 여기서 명시적으로 처리.
-if [ -f /etc/default/sidabari-collect ]; then
+if [ -f /etc/default/deckhand-collect ]; then
   # shellcheck disable=SC1091
-  . /etc/default/sidabari-collect
+  . /etc/default/deckhand-collect
 fi
 
-SERVICE_NAME="${SIDABARI_SERVICE:-}"
+SERVICE_NAME="${DECKHAND_SERVICE:-}"
 if [ -z "$SERVICE_NAME" ]; then
-  echo "[ERROR] SIDABARI_SERVICE 미설정 — /etc/default/sidabari-collect 확인" >&2
+  echo "[ERROR] DECKHAND_SERVICE 미설정 — /etc/default/deckhand-collect 확인" >&2
   exit 1
 fi
 PID="$(systemctl show -p MainPID --value "$SERVICE_NAME" 2>/dev/null || echo "")"

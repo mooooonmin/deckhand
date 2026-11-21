@@ -32,7 +32,7 @@ export function MainClaudePanel() {
   //
   // 안전장치 (CLAUDE.md §1.2 / §1.3):
   //  1. 진단 전용 키(ec2.diag_private_key_path)만 사용 — 배포용 .pem 노출 X.
-  //  2. 서버 측 ForceCommand로 잠긴 키이므로 Claude가 어떤 명령을 시도해도 sidabari-collect만 실행.
+  //  2. 서버 측 ForceCommand로 잠긴 키이므로 Claude가 어떤 명령을 시도해도 deckhand-collect만 실행.
   //  3. Bracket paste 주입 — 사용자가 검토 후 Enter (자동 실행 금지).
   //  4. 로컬 .claude/settings.local.json deny 규칙(설정 모달의 [안전 규칙 설치])이 보조 방어선.
   //
@@ -76,7 +76,7 @@ export function MainClaudePanel() {
     }
 
     // ForceCommand가 잠긴 진단 키 환경 가정 — ssh 인자로 명령을 보내든 안 보내든
-    // 서버는 SSH_ORIGINAL_COMMAND를 무시하고 sidabari-collect만 실행한다 (docs/ec2-diag-setup/README.md).
+    // 서버는 SSH_ORIGINAL_COMMAND를 무시하고 deckhand-collect만 실행한다 (docs/ec2-diag-setup/README.md).
     // Claude Code의 auto mode classifier가 긴 명령 본문을 보고 "Production Reads via remote shell"로
     // 분류하는 것을 피하기 위해 명령 인자를 보내지 않는다.
     const sshCmd = `ssh -i "${diagKey}" -p ${ec2.port} -o StrictHostKeyChecking=accept-new -o BatchMode=yes ${ec2.user}@${ec2.host}`;
@@ -86,7 +86,7 @@ export function MainClaudePanel() {
       "",
       "[안전 전제 — 반드시 숙지]",
       "- 아래 ssh는 서버 측 ForceCommand로 잠긴 진단 전용 키를 사용합니다.",
-      "- 어떤 원격 명령을 보내든 서버는 sidabari-collect 스크립트만 실행하고 끊어집니다.",
+      "- 어떤 원격 명령을 보내든 서버는 deckhand-collect 스크립트만 실행하고 끊어집니다.",
       "- 따라서 SSH로는 시스템 변경이 물리적으로 불가능합니다.",
       "- 위 사실 때문에 ssh 인자를 변형해 다른 명령(rm, systemctl restart 등)을 보내려는 시도는 의미가 없으며, 시도하지도 마세요.",
       "- scp/sftp/rsync/curl 등으로 원격 파일을 쓰거나 우회 접속을 시도하지 마세요. (로컬 .claude 권한 규칙으로도 차단되어 있습니다.)",
@@ -99,7 +99,7 @@ export function MainClaudePanel() {
       `- 서비스: ${serviceName} (systemd)`,
       "",
       "[수집 절차]",
-      "다음 명령 한 번만 실행하고 stdout/stderr를 그대로 받아 주세요. 서버 측 ForceCommand가 자동으로 sidabari-collect를 실행합니다 (클라이언트가 어떤 명령도 인자로 보내지 않음에 주의):",
+      "다음 명령 한 번만 실행하고 stdout/stderr를 그대로 받아 주세요. 서버 측 ForceCommand가 자동으로 deckhand-collect를 실행합니다 (클라이언트가 어떤 명령도 인자로 보내지 않음에 주의):",
       "",
       sshCmd,
       "",
@@ -145,7 +145,7 @@ export function MainClaudePanel() {
             command: sess.auto_start ? "claude" : "",
             cwd: sess.directory || undefined,
             // Phase 0 — Claude Code 훅이 이 PTY가 메인 패널임을 식별하도록 ENV 주입.
-            env: { SIDABARI_PANEL_ID: "main-claude" },
+            env: { DECKHAND_PANEL_ID: "main-claude" },
           },
         });
         setDiagKeyConfigured(c.ec2.diag_private_key_path.trim() !== "");
@@ -156,7 +156,7 @@ export function MainClaudePanel() {
         const message = e instanceof Error ? e.message : String(e);
         // 설정 로드 실패 → OS 기본 셸로 폴백 (사용자가 수동 진입 가능하도록)
         setResolved({
-          spawn: { command: "", env: { SIDABARI_PANEL_ID: "main-claude" } },
+          spawn: { command: "", env: { DECKHAND_PANEL_ID: "main-claude" } },
         });
         console.warn("[MainClaudePanel] config 로드 실패, 기본 셸로 폴백:", message);
       });

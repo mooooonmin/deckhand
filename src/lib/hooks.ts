@@ -18,7 +18,7 @@ export type HookKind =
   | "subagent-stop"
   | "user-prompt";
 
-/// Claude Code stdin payload + Sidabari가 추가한 _sidabari 메타.
+/// Claude Code stdin payload + Deckhand가 추가한 _deckhand 메타.
 export type HookPayload = {
   // Common
   session_id?: string;
@@ -40,8 +40,8 @@ export type HookPayload = {
   notification_type?: string;
   // UserPromptSubmit
   prompt?: string;
-  // Sidabari 주입
-  _sidabari?: {
+  // Deckhand 주입
+  _deckhand?: {
     hook_event_name_arg: string;
     panel_id: string | null;
     received_at_ms: number;
